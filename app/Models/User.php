@@ -1,17 +1,16 @@
-<?php
-
-namespace App\Models;
+<?php namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-//class User extends Authenticatable implements FilamentUser
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
+//class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -24,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'balance',
+        'role',
     ];
 
     /**
@@ -44,7 +45,41 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'balance' => 'decimal:2',
     ];
+
+    /**
+     * @return HasMany
+     */
+    public function news(): HasMany
+    {
+        return $this->hasMany(News::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    /**
+     * @param Panel $panel
+     * @return bool
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->role === 'admin';
+    }
 
 //    public function canAccessPanel(Panel $panel): bool
 //    {
