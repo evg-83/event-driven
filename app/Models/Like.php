@@ -15,17 +15,11 @@ class Like extends Model
         'target_type',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return MorphTo
-     */
     public function target(): MorphTo
     {
         return $this->morphTo();

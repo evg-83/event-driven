@@ -1,23 +1,13 @@
 <?php namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class LikeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'target_id' => 'required|integer',
@@ -26,10 +16,10 @@ class LikeController extends Controller
 
         $user = $request->user();
 
-        $existingLike = $user->likes()->where(
-            'target_id', $validated['target_id'],
-            'target_type', $validated['target_type']
-        )->exists();
+        $existingLike = $user->likes()
+            ->where('target_id', $validated['target_id'])
+            ->where('target_type', $validated['target_type'])
+            ->exists();
 
         if ($existingLike) {
             return response()->json([
@@ -45,26 +35,7 @@ class LikeController extends Controller
         return response()->json($like, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'target_id' => 'required|integer',
@@ -73,10 +44,10 @@ class LikeController extends Controller
 
         $user = $request->user();
 
-        $like = $user->likes()->where(
-            'target_id', $validated['target_id'],
-            'target_type', $validated['target_type']
-        )->first();
+        $like = $user->likes()
+            ->where('target_id', $validated['target_id'])
+            ->where('target_type', $validated['target_type'])
+            ->firstOrFail();
 
         if (!$like) {
             return response()->json(['message' => 'Not found'], Response::HTTP_NOT_FOUND);

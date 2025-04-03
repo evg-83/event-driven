@@ -48,34 +48,21 @@ class User extends Authenticatable implements FilamentUser
         'balance' => 'decimal:2',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function news(): HasMany
     {
         return $this->hasMany(News::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
-    /**
-     * @param Panel $panel
-     * @return bool
-     */
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->role === 'admin';

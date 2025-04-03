@@ -2,45 +2,35 @@
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): JsonResponse
     {
         return response()->json(Comment::latest()->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'text' => 'required|string',
+            'news_id' => 'required|exists:news,id',
         ]);
 
-        $news = Comment::create($validated);
+        $comment = auth()->user()->comments()->create($validated);
 
-        return response()->json($news, Response::HTTP_CREATED);
+        return response()->json($comment, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Comment $comment)
+    public function show(Comment $comment): JsonResponse
     {
         return response()->json($comment);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Comment $comment)
+    public function update(Request $request, Comment $comment): JsonResponse
     {
         $validated = $request->validate([
             'text' => 'required|string',
@@ -51,10 +41,7 @@ class CommentController extends Controller
         return response()->json($comment);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Comment $comment)
+    public function destroy(Comment $comment): JsonResponse
     {
         $comment->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);

@@ -1,30 +1,29 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
     Route::apiResource('news', NewsController::class);
-    Route::apiResource('comments', CommentController::class)->only(['store', 'destroy']);
-    Route::post('likes', 'LikeController@store');
-    Route::delete('likes', 'LikeController@destroy');
+    Route::apiResource('comments', CommentController::class);
+//    Route::apiResource('comments', CommentController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+
+    Route::post('likes', [LikeController::class, 'store']);
+    Route::delete('likes', [LikeController::class, 'destroy']);
+
+    Route::post('logout', [AuthController::class, 'logout']);
 });
 
 //Route::post('/webhook/upay', [UpayWebhookController::class, 'handle']);
