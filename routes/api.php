@@ -1,9 +1,11 @@
 <?php
 
+use App\Events\NewsPublishedEvent;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\NewsController;
+use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,4 +29,13 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 //Route::post('/webhook/upay', [UpayWebhookController::class, 'handle']);
+
+//mini-test for kafka
+//Route::get('/test-news-event', function () {
+//    $news = News::factory()->create();
+//
+//    event(new NewsPublishedEvent($news));
+//
+//    return response()->json(['status' => 'NewsPublishedEvent dispatched']);
+//});
 
