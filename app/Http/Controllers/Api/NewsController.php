@@ -1,50 +1,51 @@
 <?php namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NewsRequest;
+use App\Http\Resources\NewsResource;
 use App\Models\News;
+use App\Services\NewsService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
+/**
+ * @see NewsTest
+ */
 class NewsController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        return response()->json(News::latest()->paginate(10));
+        return NewsResource::collection(News::latest()->paginate(10));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(NewsRequest $request, NewsService $service): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
+        $news = $service->create(auth()->user(), $request->validated());
 
-        $news = auth()->user()->news()->create($validated);
-
-        return response()->json($news, Response::HTTP_CREATED);
+        return response()->json(new NewsResource($news), Response::HTTP_CREATED);
     }
 
-    public function show(News $news): JsonResponse
+    public function show(News $news): NewsResource
     {
-        return response()->json($news);
+        return new NewsResource($news);
     }
 
-    public function update(Request $request, News $news): JsonResponse
+    public function update(NewsRequest $request, News $news, NewsService $service): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
+        $this->authorize('update', $news);
 
-        $news->update($validated);
+        $news = $service->update($news, $request->validated());
 
-        return response()->json($news);
+        return response()->json(new NewsResource($news));
     }
 
-    public function destroy(News $news): JsonResponse
+    public function destroy(News $news, NewsService $service): JsonResponse
     {
-        $news->delete();
+        $this->authorize('delete', $news);
+
+        $service->delete($news);
+
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

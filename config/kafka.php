@@ -4,7 +4,8 @@ return [
     /*
      | Your kafka brokers url.
      */
-    'brokers' => env('KAFKA_BROKERS', 'localhost:9092'),
+    'brokers' => env('KAFKA_BROKERS', 'kafka:9092'),
+//    'brokers' => env('KAFKA_BROKERS', 'localhost:9092'),
 
     /*
      | Default security protocol
@@ -12,7 +13,7 @@ return [
     'securityProtocol' =>  env('KAFKA_SECURITY_PROTOCOL', 'PLAINTEXT'),
 
     /*
-     | Default sasl configuration 
+     | Default sasl configuration
      */
     'sasl' => [
         'mechanisms' => env('KAFKA_MECHANISMS', 'PLAINTEXT'),
