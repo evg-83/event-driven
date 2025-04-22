@@ -14,14 +14,16 @@ use Illuminate\Http\Response;
  */
 class NewsController extends Controller
 {
+    public function __construct(private readonly NewsService $service) {}
+
     public function index(): AnonymousResourceCollection
     {
         return NewsResource::collection(News::latest()->paginate(10));
     }
 
-    public function store(NewsRequest $request, NewsService $service): JsonResponse
+    public function store(NewsRequest $request): JsonResponse
     {
-        $news = $service->create(auth()->user(), $request->validated());
+        $news = $this->service->create(auth()->user(), $request->validated());
 
         return response()->json(new NewsResource($news), Response::HTTP_CREATED);
     }
@@ -31,20 +33,20 @@ class NewsController extends Controller
         return new NewsResource($news);
     }
 
-    public function update(NewsRequest $request, News $news, NewsService $service): JsonResponse
+    public function update(NewsRequest $request, News $news): JsonResponse
     {
         $this->authorize('update', $news);
 
-        $news = $service->update($news, $request->validated());
+        $news = $this->service->update($news, $request->validated());
 
         return response()->json(new NewsResource($news));
     }
 
-    public function destroy(News $news, NewsService $service): JsonResponse
+    public function destroy(News $news): JsonResponse
     {
         $this->authorize('delete', $news);
 
-        $service->delete($news);
+        $this->service->delete($news);
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

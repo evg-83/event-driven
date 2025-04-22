@@ -1,8 +1,8 @@
-<?php
+<?php namespace App\Providers;
 
-namespace App\Providers;
-
+use App\Events\CommentAddedEvent;
 use App\Events\NewsPublishedEvent;
+use App\Listeners\SendCommentToKafka;
 use App\Listeners\SendNewsToKafka;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -22,6 +22,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         NewsPublishedEvent::class => [
             SendNewsToKafka::class,
+        ],
+        CommentAddedEvent::class => [
+            SendCommentToKafka::class,
         ],
     ];
 

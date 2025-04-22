@@ -9,7 +9,11 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'text',
+        'user_id',
+        'news_id',
+    ];
 
     public function likes(): MorphMany
     {

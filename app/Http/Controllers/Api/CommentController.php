@@ -1,49 +1,63 @@
 <?php namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CommentRequest;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
+use App\Services\CommentService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Tests\Feature\api\CommentTest;
 
+/**
+ * @see CommentTest
+ */
 class CommentController extends Controller
 {
-    public function index(): JsonResponse
+    public function __construct(private readonly CommentService $service) {}
+
+    public function index(): AnonymousResourceCollection
     {
-        return response()->json(Comment::latest()->paginate(10));
+        $comments = Comment::with(['user'])->withCount('likes')->latest()->paginate(10);
+
+        return CommentResource::collection($comments);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(CommentRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'text' => 'required|string',
-            'news_id' => 'required|exists:news,id',
-        ]);
+        $comment = $this->service->create($request->user(), $request->validated());
 
-        $comment = auth()->user()->comments()->create($validated);
+        $comment->load(['user'])->loadCount('likes');
 
-        return response()->json($comment, Response::HTTP_CREATED);
+        return response()->json(new CommentResource($comment), Response::HTTP_CREATED);
     }
 
     public function show(Comment $comment): JsonResponse
     {
-        return response()->json($comment);
+        $comment->load(['user'])->loadCount('likes');
+
+        return response()->json(new CommentResource($comment));
     }
 
-    public function update(Request $request, Comment $comment): JsonResponse
+    public function update(CommentRequest $request, Comment $comment): JsonResponse
     {
-        $validated = $request->validate([
-            'text' => 'required|string',
-        ]);
+        $this->authorize('update', $comment);
 
-        $comment->update($validated);
+        $validated = $request->only(['text']);
 
-        return response()->json($comment);
+        $updated = $this->service->update($comment, $validated);
+        $updated->load(['user'])->loadCount('likes');
+
+        return response()->json(new CommentResource($comment));
     }
 
     public function destroy(Comment $comment): JsonResponse
     {
-        $comment->delete();
+        $this->authorize('delete', $comment);
+
+        $this->service->delete($comment);
+
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

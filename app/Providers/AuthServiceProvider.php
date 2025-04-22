@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use App\Models\Comment;
 use App\Models\News;
+use App\Policies\CommentPolicy;
 use App\Policies\NewsPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         News::class  => NewsPolicy::class,
+        Comment::class  => CommentPolicy::class,
     ];
 
     /**

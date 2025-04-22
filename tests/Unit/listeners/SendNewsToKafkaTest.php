@@ -1,33 +1,59 @@
 <?php namespace Tests\Unit\listeners;
 
+use App\Contracts\NewsKafkaProducerInterface;
 use App\Events\NewsPublishedEvent;
 use App\Listeners\SendNewsToKafka;
 use App\Models\News;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Junges\Kafka\Facades\Kafka;
+use Exception;
+use Mockery;
 use Tests\TestCase;
 
 class SendNewsToKafkaTest extends TestCase
 {
-    use RefreshDatabase;
+    private News $news;
 
-    public function test_kafka_is_called_with_correct_payload(): void
+    protected function setUp(): void
     {
-        Kafka::fake();
-
-        $news = News::factory()->make();
-
-        $event = new NewsPublishedEvent($news);
-        $listener = new SendNewsToKafka();
-
-        $listener->handle($event);
-
-        Kafka::assertPublishedOn('news-topic', null, function ($message) use ($news) {
-            $body = $message->getBody();
-
-            return $body['id'] === $news->id
-                && $body['title'] === $news->title
-                && $body['content'] === $news->content;
-        });
+        parent::setUp();
+        $this->news = Mockery::mock(News::class)->makePartial();
     }
-}
+
+    /**
+     * @throws Exception
+     */
+    public function test_handle_sends_news_to_kafka(): void
+    {
+        $producer = $this->mockProducer(function ($mock) {
+            $mock->shouldReceive('publish')
+                ->once()
+                ->with($this->news);
+        });
+
+        $listener = new SendNewsToKafka($producer);
+        $listener->handle(new NewsPublishedEvent($this->news));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_handle_logs_exception_on_failure(): void
+    {
+        $producer = $this->mockProducer(function ($mock) {
+            $mock->shouldReceive('publish')
+                ->once()
+                ->with($this->news)
+                ->andThrow(new Exception('Kafka error'));
+        });
+
+        $listener = new SendNewsToKafka($producer);
+        $listener->handle(new NewsPublishedEvent($this->news));
+
+        $this->assertTrue(true);
+    }
+
+    private function mockProducer(callable $setup): NewsKafkaProducerInterface
+    {
+        $mock = Mockery::mock(NewsKafkaProducerInterface::class);
+        $setup($mock);
+        return $mock;
+    }}

@@ -18,7 +18,6 @@ class NewsServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->service = new NewsService();
     }
 

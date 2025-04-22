@@ -1,11 +1,11 @@
 <?php namespace App\Listeners;
 
+use App\Contracts\NewsKafkaProducerInterface;
 use App\Events\NewsPublishedEvent;
-use App\Http\Resources\NewsResource;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Junges\Kafka\Facades\Kafka;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @see SendNewsToKafkaTest
@@ -17,10 +17,7 @@ class SendNewsToKafka implements ShouldQueue
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(protected NewsKafkaProducerInterface $producer) {}
 
     /**
      * Handle the event.
@@ -28,9 +25,14 @@ class SendNewsToKafka implements ShouldQueue
      */
     public function handle(NewsPublishedEvent $event): void
     {
-        Kafka::publish()
-            ->onTopic('news-topic')
-            ->withBody((new NewsResource($event->news))->resolve())
-            ->send();
+        try {
+            $this->producer->publish($event->news);
+
+        } catch (Exception $e) {
+            Log::error('Kafka publish failed', [
+                'error' => $e->getMessage(),
+                'news_id' => $event->news->id ?? null,
+            ]);
+        }
     }
 }
