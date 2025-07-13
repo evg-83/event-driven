@@ -14,12 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(
-            CommentKafkaProducerInterface::class, CommentKafkaProducer::class,
-        );
-        $this->app->bind(
-            NewsKafkaProducerInterface::class, NewsKafkaProducer::class,
-        );
+        $this->app->bind(CommentKafkaProducerInterface::class, CommentKafkaProducer::class);
+        $this->app->bind(NewsKafkaProducerInterface::class, NewsKafkaProducer::class);
     }
 
     /**
