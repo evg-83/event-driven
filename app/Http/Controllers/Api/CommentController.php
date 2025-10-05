@@ -8,7 +8,6 @@ use App\Services\CommentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
-use Tests\Feature\api\CommentTest;
 
 /**
  * @see CommentTest
@@ -19,7 +18,7 @@ class CommentController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        $comments = Comment::with(['user'])->withCount('likes')->latest()->paginate(10);
+        $comments = Comment::with(['user', 'likes'])->latest()->paginate(10);
 
         return CommentResource::collection($comments);
     }
@@ -28,14 +27,12 @@ class CommentController extends Controller
     {
         $comment = $this->service->create($request->user(), $request->validated());
 
-        $comment->load(['user'])->loadCount('likes');
 
         return response()->json(new CommentResource($comment), Response::HTTP_CREATED);
     }
 
     public function show(Comment $comment): JsonResponse
     {
-        $comment->load(['user'])->loadCount('likes');
 
         return response()->json(new CommentResource($comment));
     }
@@ -47,9 +44,7 @@ class CommentController extends Controller
         $validated = $request->only(['text']);
 
         $updated = $this->service->update($comment, $validated);
-        $updated->load(['user'])->loadCount('likes');
-
-        return response()->json(new CommentResource($comment));
+        return response()->json(new CommentResource($updated));
     }
 
     public function destroy(Comment $comment): JsonResponse

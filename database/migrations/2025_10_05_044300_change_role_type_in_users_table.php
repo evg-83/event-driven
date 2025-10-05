@@ -11,14 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('likes', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('target');
-            $table->timestamps();
-
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-
-            $table->unique(['user_id', 'target_type', 'target_id']);
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role', 20)->default('user')->change();
         });
     }
 
@@ -27,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('likes');
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['admin', 'user'])->default('user')->change();
+        });
     }
 };

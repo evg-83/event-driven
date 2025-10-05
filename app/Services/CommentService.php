@@ -3,7 +3,6 @@
 use App\Events\CommentAddedEvent;
 use App\Models\Comment;
 use App\Models\User;
-use Tests\Unit\services\CommentServiceTest;
 
 /**
 * @see CommentServiceTest

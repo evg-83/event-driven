@@ -44,6 +44,10 @@ class NewsTest extends TestCase
             ->assertJsonFragment([
                 'title' => self::SOME_TITLE,
             ]);
+
+        $this->assertDatabaseHas('news', [
+            'title' => self::SOME_TITLE,
+        ]);
     }
 
     /**

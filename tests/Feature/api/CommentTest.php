@@ -106,6 +106,17 @@ class CommentTest extends TestCase
         ]);
     }
 
+    public function test_user_cannot_delete_others_comments(): void
+    {
+        $user = User::factory()->create();
+        $comment = Comment::factory()->create();
+
+        $this->authenticate($user);
+        $response = $this->deleteJson("/api/comments/{$comment->id}");
+
+        $response->assertForbidden();
+    }
+
     public function test_comment_added_event_is_dispatched_on_store(): void
     {
         Event::fake([CommentAddedEvent::class]);
